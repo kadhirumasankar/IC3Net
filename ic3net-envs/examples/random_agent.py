@@ -1,4 +1,6 @@
+import time
 from ic3net_envs.traffic_junction_env import TrafficJunctionEnv
+from ic3net_envs.predator_prey_env import PredatorPreyEnv
 import argparse
 import sys
 import signal
@@ -16,7 +18,7 @@ if __name__ == '__main__':
     parser.add_argument('--display', action="store_true", default=False,
                         help="Use to display environment")
 
-    env = TrafficJunctionEnv()
+    env = PredatorPreyEnv()
     env.init_curses()
     env.init_args(parser)
 
@@ -46,8 +48,11 @@ if __name__ == '__main__':
                 actions.append(action)
             obs, reward, done, info = env.step(actions)
 
-            if args.display:
+            if True:
                 env.render()
+                print(episodes)
+                print(reward)
+                time.sleep(0.1)
         episodes += 1
         print(reward)
 

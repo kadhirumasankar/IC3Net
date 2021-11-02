@@ -20,11 +20,16 @@ Design Decisions:
 import random
 import math
 import curses
+import subprocess
 
 # 3rd party modules
 import gym
 import numpy as np
 from gym import spaces
+
+from subprocess import call
+import os
+from time import sleep
 
 
 class PredatorPreyEnv(gym.Env):
@@ -41,6 +46,8 @@ class PredatorPreyEnv(gym.Env):
         self.PREY_REWARD = 0
         self.POS_PREY_REWARD = 0.05
         self.episode_over = False
+        self.env = "PredatorPrey"
+        self._max_episode_steps = 100
 
     def init_curses(self):
         self.stdscr = curses.initscr()
@@ -56,7 +63,9 @@ class PredatorPreyEnv(gym.Env):
         env = parser.add_argument_group('Prey Predator task')
         env.add_argument('--nenemies', type=int, default=1,
                          help="Total number of preys in play")
-        env.add_argument('--dim', type=int, default=5,
+        env.add_argument('--nfriendly', type=int, default=1,
+                         help="Total number of friendly in play")
+        env.add_argument('--dim', type=int, default=3,
                          help="Dimension of box")
         env.add_argument('--vision', type=int, default=2,
                          help="Vision of predator")
@@ -172,6 +181,7 @@ class PredatorPreyEnv(gym.Env):
 
     def _get_cordinates(self):
         idx = np.random.choice(np.prod(self.dims),(self.npredator + self.nprey), replace=False)
+        # idx = np.array([0, 8])
         return np.vstack(np.unravel_index(idx, self.dims)).T
 
     def _set_grid(self):
@@ -222,7 +232,7 @@ class PredatorPreyEnv(gym.Env):
             return
 
         # STAY action
-        if act==5:
+        if act==4:
             return
 
         # UP
@@ -304,9 +314,14 @@ class PredatorPreyEnv(gym.Env):
         grid.insert(axis, idx)
         return tuple(grid)
 
+    def clear(self):
+        # _ = call('clear' if os.name == 'posix' else 'cls')
+        subprocess.run(["clear", "-x"])
+
     def render(self, mode='human', close=False):
+        self.clear()
         grid = np.zeros(self.BASE, dtype=object).reshape(self.dims)
-        self.stdscr.clear()
+        # self.stdscr.clear()
 
         for p in self.predator_loc:
             if grid[p[0]][p[1]] != 0:
@@ -320,20 +335,35 @@ class PredatorPreyEnv(gym.Env):
             else:
                 grid[p[0]][p[1]] = 'P'
 
+        # for row_num, row in enumerate(grid):
+        #     for idx, item in enumerate(row):
+        #         if item != 0:
+        #             if 'X' in item and 'P' in item:
+        #                 self.stdscr.addstr(row_num, idx * 4, item.center(3), curses.color_pair(3))
+        #             elif 'X' in item:
+        #                 self.stdscr.addstr(row_num, idx * 4, item.center(3), curses.color_pair(1))
+        #             else:
+        #                 self.stdscr.addstr(row_num, idx * 4, item.center(3),  curses.color_pair(2))
+        #         else:
+        #             self.stdscr.addstr(row_num, idx * 4, '0'.center(3), curses.color_pair(4))
+
+        # self.stdscr.addstr(len(grid), 0, '\n')
+        # self.stdscr.refresh()
+
+        
         for row_num, row in enumerate(grid):
             for idx, item in enumerate(row):
-                if item != 0:
-                    if 'X' in item and 'P' in item:
-                        self.stdscr.addstr(row_num, idx * 4, item.center(3), curses.color_pair(3))
-                    elif 'X' in item:
-                        self.stdscr.addstr(row_num, idx * 4, item.center(3), curses.color_pair(1))
-                    else:
-                        self.stdscr.addstr(row_num, idx * 4, item.center(3),  curses.color_pair(2))
-                else:
-                    self.stdscr.addstr(row_num, idx * 4, '0'.center(3), curses.color_pair(4))
-
-        self.stdscr.addstr(len(grid), 0, '\n')
-        self.stdscr.refresh()
+                print(f"{item} ", end='')
+                # if item != 0:
+                #     if 'X' in item and 'P' in item:
+                #         self.stdscr.addstr(row_num, idx * 4, item.center(3), curses.color_pair(3))
+                #     elif 'X' in item:
+                #         self.stdscr.addstr(row_num, idx * 4, item.center(3), curses.color_pair(1))
+                #     else:
+                #         self.stdscr.addstr(row_num, idx * 4, item.center(3),  curses.color_pair(2))
+                # else:
+                #     self.stdscr.addstr(row_num, idx * 4, '0'.center(3), curses.color_pair(4))
+            print('')
 
     def exit_render(self):
         curses.endwin()
