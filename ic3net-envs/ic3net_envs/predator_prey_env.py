@@ -63,11 +63,11 @@ class PredatorPreyEnv(gym.Env):
         env = parser.add_argument_group('Prey Predator task')
         env.add_argument('--nenemies', type=int, default=1,
                          help="Total number of preys in play")
-        env.add_argument('--nfriendly', type=int, default=1,
+        env.add_argument('--nfriendly', type=int, default=3,
                          help="Total number of friendly in play")
-        env.add_argument('--dim', type=int, default=3,
+        env.add_argument('--dim', type=int, default=5,
                          help="Dimension of box")
-        env.add_argument('--vision', type=int, default=2,
+        env.add_argument('--vision', type=int, default=0,
                          help="Vision of predator")
         env.add_argument('--moving_prey', action="store_true", default=False,
                          help="Whether prey is fixed or moving")
@@ -79,6 +79,7 @@ class PredatorPreyEnv(gym.Env):
                          help="Whether prey can communicate.")
 
     def multi_agent_init(self, args):
+        print(args)
 
         # General variables defining the environment : CONFIG
         params = ['dim', 'vision', 'moving_prey', 'mode', 'enemy_comm']
@@ -180,8 +181,8 @@ class PredatorPreyEnv(gym.Env):
         return
 
     def _get_cordinates(self):
-        idx = np.random.choice(np.prod(self.dims),(self.npredator + self.nprey), replace=False)
-        # idx = np.array([0, 8])
+        # idx = np.random.choice(np.prod(self.dims),(self.npredator + self.nprey), replace=False)
+        idx = np.array([0, 6, 12, 24])
         return np.vstack(np.unravel_index(idx, self.dims)).T
 
     def _set_grid(self):
